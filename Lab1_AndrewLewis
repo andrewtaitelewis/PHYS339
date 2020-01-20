@@ -106,6 +106,7 @@ def pValueCalculator(chiSquareValue, dof):
     """
 
     value = 1 - chi2.cdf(chiSquareValue,dof)
+    print(value)
     return value
 
 
@@ -312,9 +313,14 @@ def main(numSamples,numBins, numTrials):
     #Running chi sqaure
     chiSquareTest(GaussianProbability,yBin,0.01)
 
-
+    #a little bet
+    maxValue = 0
+    for i in range(1000000):
+        a = gaussian_distribution(1,1)[0]
+        if a > maxValue:
+            maxValue = a
     
-
-main(6000,20,200)
+    print(maxValue)
+main(100000,20,10)
 
 
