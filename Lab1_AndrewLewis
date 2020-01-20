@@ -317,4 +317,163 @@ def main(numSamples,numBins, numTrials):
 
 main(6000,20,200)
 
+"""
+Below this point is the code used to simulate the evolution of the means and stds of each dist
+
+Created on Sun Jan 12 14:24:57 2020
+
+@author: gabriel_giampa
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import random as r
+
+def lin(ro):
+    return np.sqrt(ro)
+
+sig = 1
+var = sig**2
+def gauss(ro):
+    tval = r.uniform(0,2*np.pi)
+    rval = np.sqrt(-2*var*np.log(1 - ro))
+    return rval * np.cos(tval)
+    
+
+N = 10 #initial number of samples
+
+iterations = 100 #increase sample size 99 times
+samples = np.zeros(iterations)
+samples[0] = 10
+uni_mean = np.zeros(iterations)
+lin_mean = np.zeros(iterations)
+gaus_mean = np.zeros(iterations)
+uni_std = np.zeros(iterations)
+lin_std = np.zeros(iterations)
+gaus_std = np.zeros(iterations)
+
+for i in range(iterations):
+    uni_val = np.zeros(int(samples[i]))
+    lin_val = np.zeros(int(samples[i]))
+    gaus_val = np.zeros(int(samples[i]))
+    
+    for j in range(int(samples[i])):
+        ran = r.random()
+        uni_val[j] = ran
+        lin_val[j] = lin(ran)
+        gaus_val[j] = gauss(ran)
+    
+    uni_mean[i] = np.mean(uni_val)
+    uni_std[i] = np.std(uni_val)
+    lin_mean[i] = np.mean(lin_val)
+    lin_std[i] = np.std(lin_val)
+    gaus_mean[i] = np.mean(gaus_val)
+    gaus_std[i] = np.std(gaus_val)
+    
+    if i != 99:
+        samples[i+1] = samples[i] + 400
+
+
+
+plt.figure()
+plt.title("Evolution of Uniform Distribution Mean as Sample Size Grows")
+plt.xlabel("Sample Size")
+plt.ylabel("Mean")
+plt.plot(samples,uni_mean, 'o')
+plt.show()
+
+plt.figure()
+plt.title("Evolution of Linear Distribution Mean as Sample Size Grows")
+plt.xlabel("Sample Size")
+plt.ylabel("Mean")
+plt.plot(samples, lin_mean, 'o')
+plt.show()
+
+plt.figure()
+plt.title("Evolution of Gaussian Distribution Mean as Sample Size Grows")
+plt.xlabel("Sample Size")
+plt.ylabel("Mean")
+plt.plot(samples,gaus_mean, 'o')
+plt.show()
+
+plt.figure()
+plt.title("Evolution of Uniform Distribution St. Deviation")
+plt.xlabel("Sample Size")
+plt.ylabel("STD")
+plt.plot(samples,uni_std, 'o')
+plt.show()
+
+plt.figure()
+plt.title("Evolution of Linear Distribution St. Deviation")
+plt.xlabel("Sample Size")
+plt.ylabel("STD")
+plt.plot(samples,lin_std, 'o')
+plt.show()
+
+plt.figure()
+plt.title("Evolution of Gaussian Distribution St. Deviation")
+plt.xlabel("Sample Size")
+plt.ylabel("STD")
+plt.plot(samples,gaus_std, 'o')
+plt.show()
+
+"""
+Below this point is the code used to simulate digitization
+Note Ns needs to be manually changed, the program will not loop through an array of sample sizes
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+Created on Sun Jan 19 14:42:45 2020
+
+@author: gabriel_giampa
+"""
+
+import numpy as np
+import random as r
+import matplotlib.pyplot as plt
+
+def gauss(ro, sig):
+    var = sig**2
+    tval = r.uniform(0,2*np.pi)
+    rval = np.sqrt(-2*var*np.log(1 - ro))
+    return rval * np.cos(tval) + 0.5
+
+def histMean(sum_range, values, edges):
+    binCenter = np.zeros(len(edges) - 1)
+    for i in range(len(edges) - 1):
+        binCenter[i] = 0.5 * (edges[i] + edges[i+1])
+    rollingSum = 0.0
+    for i in range(len(values)):
+        rollingSum += values[i]*binCenter[i]
+    return rollingSum / sum_range
+
+Ns = 10000
+sig = 0.001
+
+sigma = np.zeros(100)
+sigma[0] = 0.001
+
+values = np.zeros(Ns)
+means = np.zeros(10)
+uncerts = np.zeros(100)
+
+for k in range(100):
+    for i in range(10):
+        for j in range(Ns):
+            values[j] = gauss(r.random(), sig)
+        bin_val, bin_edges = np.histogram(values, 256, (0,1))
+        sum_in_range = sum(bin_val) #should be 1000 or lower, if sigma too high
+        means[i] = histMean(sum_in_range, bin_val, bin_edges)
+    uncerts[k] = np.std(means)
+    sig = sig + 0.005
+    if(k!= 99):
+        sigma[k+1] = sigma[k] + 0.005
+
+
+plt.figure()
+plt.plot(sigma,uncerts)
+plt.xlabel("Standard Deviation $\sigma$")
+plt.axhline(1/256.0, linestyle = '-', color = 'orange')
+plt.ylabel("Uncertainty in mean")
+plt.title("Evolution of Uncertainty in List of 10 Means as $\sigma$ Grows, N = " + str(Ns))
+plt.show()
 
