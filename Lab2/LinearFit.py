@@ -33,6 +33,7 @@ def main():
 
     A1[1] = linearFunction(A1[1],slope,intercept)
     A2[1] = linearFunction(A2[1],slope,intercept)
+    print(A1[0])
 
     #Residuals
     A1Residuals = A1[0] - linspace
@@ -42,29 +43,72 @@ def main():
 
 
 
+
+
     #Our Figure of A1
-    plt.figure()
-    plt.subplot(1,1,1)
+    #Plot and residuals, therefore two subplots
+    def figure1():
+        '''Plots Figure 1 '''
+        fig,(ax1,ax2) = plt.subplots(2,1)
+        #First subplot,i.e plot
 
-    plt.subplot(2,1,1)
-    plt.plot(A1[0],yAxis,'o')
-    plt.errorbar(A1[0],yAxis,yerr=A1[1],fmt = '.')
-    plt.xlabel('8 Bit Number Read by A1')
-    plt.ylabel('Voltage [V]')
-    #Our Residuals
-    plt.subplot(2,1,2)
-    plt.plot(A1[0],A1Residuals,'o')
-    plt.axhline(0,color = 'black')
-    plt.errorbar(A1[0],A1Residuals,yerr = A1ResidualError ,fmt = '.')
+        ax1.plot(A1[0],yAxis,'o')
+        ax1.errorbar(A1[0],yAxis,yerr=A1[1],fmt = '.')
+        ax1.set_ylabel('Voltage [V]')
+        ax1.set_xlabel('8 Bit Number Read by A1 ')
+        ax1.set_facecolor((.97,.97,.97))
+        ax1.legend(['Number Read','Error Bars'])
+        #Residuals Subplot
 
-    plt.ylabel('Voltage [V]')
-    plt.xlabel('8 Bit Number Read by A1')
-    print(A1ResidualError)
-    plt.tight_layout()
-    plt.savefig('A1')
+        ax2.plot(A1[0],A1Residuals,'o', label ='Number Read by A1 ' )
+        ax2.axhline(0,color = 'black')
+        ax2.errorbar(A1[0],A1Residuals,yerr = A1ResidualError ,fmt = '.', label = 'Error Bars')
+        ax2.set_ylabel('Number Read by A1')
+        ax2.set_xlabel('8 Bit Number Read by A1')
+        ax2.set_facecolor((.97,.97,.97))
+        ax2.legend()
+        #Figure settings
+        ax1.set_title('8 Bit Number Read Given a Voltage')
+        
+        fig.tight_layout()
+        fig.align_ylabels()
 
+        plt.savefig('A1')
+        return
 
+    def figure2():
+        '''Plots Figure 2 '''
+        fig,(ax1,ax2) = plt.subplots(2,1)
+        #First subplot,i.e plot
+
+        ax1.plot(A2[0],yAxis,'o', label = 'Number Read by A2')
+        ax1.errorbar(A2[0],yAxis,yerr=A2[1],fmt = '.', label = 'Error Bars')
+        ax1.set_ylabel('Voltage [V]')
+        ax1.set_xlabel('8 Bit Number Read by A2 ')
+        ax1.set_facecolor((.97,.97,.97))
+        ax1.legend()
+        #Residuals Subplot
+
+        ax2.plot(A2[0],A2Residuals,'o', label = 'Number Read')
+        ax2.axhline(0,color = 'black')
+        ax2.errorbar(A2[0],A2Residuals,yerr = A2ResidualError ,fmt = '.', label = 'Error Bars')
+        ax2.set_ylabel('Number Read')
+        ax2.set_xlabel('8 Bit Number Read by A2')
+        ax2.legend()
+        ax2.set_facecolor((.97,.97,.97))
+        #Figure settings
+        ax1.set_title('8 Bit Number Read Given a Voltage')
+        
+        fig.tight_layout()
+        fig.align_ylabels()
+
+        plt.savefig('A2')
+        return
+    #Ploting our figures
+    figure1()
+    figure2()
     #Our figure of A2
+    '''
     plt.figure()
     plt.subplot(2,1,1)
     plt.plot(A2[0],yAxis,'o')
@@ -78,13 +122,26 @@ def main():
     plt.axhline(0,color = 'black')
     plt.xlabel('8 Bit Number Read by A2')
     plt.tight_layout()
-
+    plt.ylabel('Voltage')
+   
     plt.savefig('A2')
 
-    plt.close()
-    #Subplots?
+    '''
+    #Subplots, properly
+    #Creates a figure and only one subplot
+    fig,ax = plt.subplots()
+    ax.plot(A2[0],A2Residuals)
+    fig.savefig('subplotExample')
     
-
+    #Creates two subplots
+    fig, (ax1,ax2) = plt.subplots(2,1)
+    ax1.plot(A1[0],yAxis,'o')
+    ax2.plot(A1[0],A1Residuals)
+    ax1.errorbar(A2[0],A2Residuals,yerr =A2ResidualError*100, fmt = '.')
+    ax1.set_ylabel('Voltage')
+    ax2.set_ylabel('Voltage')
+    fig.align_ylabels()
+    fig.savefig('subplotExample2')
 
 
     return
