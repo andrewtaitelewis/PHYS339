@@ -154,7 +154,6 @@ def main():
         fig.align_ylabels()
         fig.tight_layout()
         fig.savefig('LinearFit')
-
     #Ploting our figures
     figure1()
     figure2()
@@ -162,7 +161,32 @@ def main():
     
 
     #Candle Flickering 
-    
+    #Plotting the flickering vs time
+    def candleFlicker(filename):
+        '''Plots the candle flickering intensity
+        Params
+        ------
+        filename : The name of the file for the data we want to plot, (CSV), requires an r in front of the path'''
+        #Loading the data
 
+        data = np.loadtxt(filename, delimiter =',').transpose()
+        xAxis = data[0]
+        yAxis = data[1]
+
+        #Our figure
+        fig, ax = plt.subplots(1,1)
+        ax.plot(xAxis,yAxis, label = 'Voltage')
+        ax.set_facecolor((.97,.97,.97))
+        ax.set_ylabel('Intensity [V]')
+        ax.set_xlabel('Iteration Number')
+        ax.legend()
+        ax.set_title('Intensity vs. Iterations')
+
+
+        fig.savefig('candlePlot')
+        
+
+        return
+    candleFlicker(r"C:\Users\Andrew\Desktop\Classes\PHYS 339\Lab2\Candle Flickering\flicker.csv")
     return
 main()
