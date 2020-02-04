@@ -3,3 +3,6 @@
 
 #Ignore all PNG files
 *.png
+
+#Ignore weird directory
+./
