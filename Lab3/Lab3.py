@@ -73,10 +73,13 @@ def reduced_chi_squared_value_calculator(expected_behavior,observed_behavior,dof
     ''' Calculates the reduced chi square value, using the chi square value and degrees of freedom
     Parameters
     ----------
+    expected_behavior: The expected behavior of our given distribution
+    observed_behavior: The behavior that was observed in the lab
+    dof: The degrees of freedom for the given distribution
     '''
 
     chiSquareValue = chi_squared_value_calculator(expected_behavior,observed_behavior)
-
+    return chiSquareValue/dof
 def poisson(u,n):
     return np.exp(-u)*(u**(n))/m.factorial(n)
 
@@ -104,13 +107,107 @@ def histogramBinCenters(xBinValues):
 
 #Section 5.3
 #We will need to vary the chi square distributions
+def section5_3(data, binNum,confidenceInterval):
+    ''' Our function running everything we need for section 5.3
+    Parameters
+    ----------
+    Data: Data loaded from a file
+    binNum: Number of bins to be used 
+    condifenceInterval: The % confidence we are using for the chi square test.
+    '''
+    #Helper Functions
+    def gaussian_tester(expected_behavior, observed_behavior,binNum):
+        '''Tests the data against the gaussian distribution 
+        Parameters
+        ----------
+        expected_behavior: The expected behavior of the distribution
+        observed_behavior: The data that was observed in the experiment
+        binNum: The number of bins used to bin the data
+        Returns
+        -------
+        Reduced Chi square value 
+        '''
+        #Degrees of freedom for the distribution
+        dof = binNum - 3
+
+        reducedChiSquare = reduced_chi_squared_value_calculator(expected_behavior, observed_behavior, dof)   
+        return reducedChiSquare
+
+    def poisson_tester(expected_behavior, observed_behavior,binNum):
+        '''Tests the data against the gaussian distribution 
+        Parameters
+        ----------
+        expected_behavior: The expected behavior of the distribution
+        observed_behavior: The data that was observed in the experiment
+        binNum: The number of bins used to bin the data
+        Returns
+        -------
+        Reduced Chi square value 
+        '''
+        dof = binNum - 2
+
+        reducedChiSquare = reduced_chi_squared_value_calculator(expected_behavior, observed_behavior, dof)
+
+        return reducedChiSquare
+
+    def MC_distiribution_tester(numRandoms, randomMeans):
+        ''' Tests poisson and gaussian distributions against randomly generated poisson 
+            data
+        Parameters
+        ----------
+        numRandoms: Number of random data points generated
+        randomMeans: The random mean the points are generated around
+        '''
+        #Generating test data
+        testData = np.random.poisson(randomMeans,numRandoms):
+
+        #Bin Data
+        binnedData,binEdges = np.histogram(data,binNum)
+
+        #Getting bin centers
+        binCenter = histogramBinCenters(binEdges)
+        for i in binCenter:
+            binCenter[i] = int(i)
+        #Generating the expectedValues for Poisson and Gaussian distributuions at given values
+        #Generating Poisson
+        poissonExpected = []
+        for i in binCenter:
+            poissonExpected.append(poisson(randomMeans,i))
+        #Generate Gaussian
+        #Standard Deviation of Datapoints
+        std = np.std(testData,ddof = 1)
+        gaussianExpected= []
+        for i in binCenter:
+            gaussianExpected.append(gaussian(i,randomMeans,std))
+
+        #Time to test the chi square values
+        gaussianChiSquareValue = gaussian_tester(gaussianExpected,binnedData, binNum)
+        poissonChiSquareValue = poisson_tester(poissonExpected,binnedData,binNum)
+
+        #Get the threshold chi square value
 
 
 
-#Histogram
+        
+
+        return
+
+    #Outer function
+
+    return
+
+
 #Importing the data
-data = np.loadtxt(r"data\count1.csv",delimiter =',')
+def main():
+    '''Our main method'''
+    #Importing the data
+    data = np.loadtxt(r"data\count1.csv",delimiter =',')
 
+    #Section 5.3
+    section5_3(data,4)
+
+    return
+data = np.loadtxt(r"data\count1.csv",delimiter =',')
 binData,binEdges, dataType = plt.hist(data,bins = 15)
 plt.close()
 #Return the bin centers
