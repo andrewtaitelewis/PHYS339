@@ -168,6 +168,7 @@ def section5_3(binNum,confidenceInterval):
         poissonThreshhold = chi2.isf(confidenceInterval,binNum -2)
 
         #Are the distributions consistent
+
         #Gaussian
         if gaussianChiSquareValue >= gaussianThreshhold:
             print('Gaussian Distribution is not consistent with the data')
@@ -189,14 +190,14 @@ def section5_3(binNum,confidenceInterval):
         #plt.plot(binCenter,poissonExpected,'or')
         #plt.plot(binCenter,gaussianExpected,'ok')
         #plt.show()
-        #print(chiValues)
+        
         return thresholds,chiValues
 
     #Outer function
 
     #Show how Chi square values evolve with N
-    Ns = [10,100,1000]
-    Means = [2,5,7]
+    Ns = [10,100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200]
+    Means = [2,5,7,9,11,15,30]
 
     #Each list will hold an array of chi square values at a certain mean with different Ns
     gaussianChiSquares = []
@@ -206,6 +207,7 @@ def section5_3(binNum,confidenceInterval):
         poissonAdded = []
         for j in Ns:
             thresholds, toAdd = MC_distiribution_tester(j,i)
+
             gaussianAdded.append(toAdd[0])
             poissonAdded.append(toAdd[1])
 
@@ -215,6 +217,14 @@ def section5_3(binNum,confidenceInterval):
     print('Gaussian Chi Squares' + str(gaussianChiSquares))
     print('Poisson Chi Squares' + str(poissonChiSquares))
 
+    #Plot of evolution of chi square values
+    plt.plot(Ns,gaussianChiSquares[0],'o',label = 'Gaussian Chi Square about Mean 2', )
+    plt.plot(Ns,poissonChiSquares[0], 'o',label = 'Poisson Chi Square about Mean 2')
+    plt.legend()
+
+    plt.xlabel('Number of Samples ,(N)')
+    plt.ylabel("Chi Square Value")
+    plt.show()
    
 
     print(MC_distiribution_tester(1000,1))
