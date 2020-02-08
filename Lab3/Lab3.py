@@ -184,16 +184,37 @@ def section5_3(binNum,confidenceInterval):
         chiValues = [gaussianChiSquareValue,poissonChiSquareValue]
 
         #Plot it to check
-        plt.bar(binCenter,binnedData)
-        plt.plot(binCenter,poissonExpected,'or')
-        plt.plot(binCenter,gaussianExpected,'ok')
-        plt.show()
-        print(chiValues)
+
+        #plt.bar(binCenter,binnedData)
+        #plt.plot(binCenter,poissonExpected,'or')
+        #plt.plot(binCenter,gaussianExpected,'ok')
+        #plt.show()
+        #print(chiValues)
         return thresholds,chiValues
 
     #Outer function
 
-    #Num randoms
+    #Show how Chi square values evolve with N
+    Ns = [10,100,1000]
+    Means = [2,5,7]
+
+    #Each list will hold an array of chi square values at a certain mean with different Ns
+    gaussianChiSquares = []
+    poissonChiSquares = []
+    for i in Means:
+        gaussianAdded = []
+        poissonAdded = []
+        for j in Ns:
+            thresholds, toAdd = MC_distiribution_tester(j,i)
+            gaussianAdded.append(toAdd[0])
+            poissonAdded.append(toAdd[1])
+
+        gaussianChiSquares.append(gaussianAdded)
+        poissonChiSquares.append(poissonAdded)
+
+    print('Gaussian Chi Squares' + str(gaussianChiSquares))
+    print('Poisson Chi Squares' + str(poissonChiSquares))
+
    
 
     print(MC_distiribution_tester(1000,1))
