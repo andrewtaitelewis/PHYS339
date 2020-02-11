@@ -75,6 +75,7 @@ def reduced_chi_squared_value_calculator(expected_behavior,observed_behavior,dof
     '''
 
     chiSquareValue = chi_squared_value_calculator(expected_behavior,observed_behavior)
+    
     return chiSquareValue/dof
 
 def poisson(u,n):
@@ -104,7 +105,7 @@ def histogramBinCenters(xBinValues):
 
 #Section 5.3
 #We will need to vary the chi square distributions
-def section5_3(binNum,confidenceInterval):
+def section5_3(confidenceInterval):
     ''' Our function running everything we need for section 5.3
     Parameters
     ----------
@@ -128,12 +129,25 @@ def section5_3(binNum,confidenceInterval):
         '''
         #Generating test data
         testData = np.random.poisson(randomMeans,numRandoms)
-        
+        testData = testData[testData > 0]
+
+
+        #Make the bins only reach 3 standard deviations
+        std = np.std(testData)
+        mean = np.mean(testData)
+        maxBinValue = int(mean + 3*std)
+        minBinValue = int(mean - 3*std)
+        if mean - 3*std < 0:
+            minBinValue = 1
+
+        #Now we cut off the data above our bin
+        testData = testData[testData < maxBinValue]
+
         #Bin Data
         #Number of bins will be equal to max(num)-min(num)
-        binNum = (max(testData) - min(testData))+1
+        binNum = maxBinValue - minBinValue
 
-        binnedData,binEdges = np.histogram(testData,binNum,range = (-0.5,max(testData)+0.5))
+        binnedData,binEdges = np.histogram(testData,binNum,range = (minBinValue,maxBinValue))
         
         
         #Getting bin centers
@@ -155,71 +169,78 @@ def section5_3(binNum,confidenceInterval):
             gaussianExpected.append(gaussian(i,randomMeans,std)*numRandoms)
 
         #Time to test the chi square values
-        
-        
         gaussianChiSquareValue = reduced_chi_squared_value_calculator(gaussianExpected,binnedData, binNum-3)
         poissonChiSquareValue = reduced_chi_squared_value_calculator(poissonExpected,binnedData,binNum-2)
 
-
-        gaussianChiSquareValue = gaussianChiSquareValue*(binNum-3)
-        poissonChiSquareValue = poissonChiSquareValue*(binNum-2)
         #Get the threshold chi square value
-        gaussianThreshhold = (chi2.isf(confidenceInterval,binNum -3))
-        poissonThreshhold = chi2.isf(confidenceInterval,binNum -2)
+        #With the reduced value, i.e the divisions
+        gaussianThreshhold = (chi2.isf(confidenceInterval,binNum -3))/(binNum -3)
+        poissonThreshhold = chi2.isf(confidenceInterval,binNum -2)/(binNum -2)
+
+
 
         #Are the distributions consistent
-
+        print("N = " + str(numRandoms))
         #Gaussian
-        if gaussianChiSquareValue >= gaussianThreshhold:
+        if gaussianChiSquareValue > gaussianThreshhold:
             print('Gaussian Distribution is not consistent with the data')
-        elif gaussianChiSquareValue < gaussianThreshhold:
+        elif gaussianChiSquareValue <= gaussianThreshhold:
              print('Gaussian Distribution is consistent with the data')
-        
+             
         #Poisson 
-        if poissonChiSquareValue >= poissonThreshhold:
+       
+        if poissonChiSquareValue > poissonThreshhold:
             print('Poisson Distribution is not consistent with the data')
-        elif poissonChiSquareValue < poissonThreshhold:
+            
+        elif poissonChiSquareValue <= poissonThreshhold:
             print('Poisson Distribution is consistent with the data')
+
+        
         #Data to return
         thresholds = [gaussianThreshhold,poissonThreshhold]
         chiValues = [gaussianChiSquareValue,poissonChiSquareValue]
 
-        #Plot it to check
 
-        #plt.bar(binCenter,binnedData)
-        #plt.plot(binCenter,poissonExpected,'or')
-        #plt.plot(binCenter,gaussianExpected,'ok')
-        #plt.show()
+
+        #Plot it to check
+        '''
         
+        plt.show()
+        '''
         return thresholds,chiValues
 
     #Outer function
 
     #Show how Chi square values evolve with N
-    Ns = [10,100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200]
-    Means = [2,5,7,9,11,15,30]
+    
+    Ns = np.linspace(10,7000,89)
+    
+    Means = [7]
 
     #Each list will hold an array of chi square values at a certain mean with different Ns
     gaussianChiSquares = []
     poissonChiSquares = []
+    #Thresholds are the maximum chi squared values we can get
+    thresholds =[]
+
+    #Accept distribution string
+
     for i in Means:
         gaussianAdded = []
         poissonAdded = []
         for j in Ns:
-            thresholds, toAdd = MC_distiribution_tester(j,i)
+            thresholds2, toAdd = MC_distiribution_tester(int(j),i)
 
             gaussianAdded.append(toAdd[0])
             poissonAdded.append(toAdd[1])
-
+            thresholds.append(thresholds2)
         gaussianChiSquares.append(gaussianAdded)
         poissonChiSquares.append(poissonAdded)
-
-    print('Gaussian Chi Squares' + str(gaussianChiSquares))
-    print('Poisson Chi Squares' + str(poissonChiSquares))
+    thresholds = np.asarray(thresholds).T
 
     #Plot of evolution of chi square values
-    plt.plot(Ns,gaussianChiSquares[0],'o',label = 'Gaussian Chi Square about Mean 2', )
-    plt.plot(Ns,poissonChiSquares[0], 'o',label = 'Poisson Chi Square about Mean 2')
+    plt.plot(Ns,gaussianChiSquares[0],'o')
+    plt.plot(Ns,poissonChiSquares[0], 'o')
     plt.legend()
 
     plt.xlabel('Number of Samples ,(N)')
@@ -227,7 +248,6 @@ def section5_3(binNum,confidenceInterval):
     plt.show()
    
 
-    print(MC_distiribution_tester(1000,1))
 
     #Means
   
@@ -245,7 +265,7 @@ def main():
     data = np.loadtxt(r"data\count1.csv",delimiter =',')
 
     #Section 5.3
-    section5_3(5,0.05)
+    section5_3(0.05)
 
     return
 
@@ -288,3 +308,4 @@ yAxis = gaussian(xAxis,mean,var )
 plt.plot(xAxis,yAxis)
 plt.show()
 print(len(xAxis))
+
