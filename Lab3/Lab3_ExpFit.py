@@ -69,18 +69,21 @@ def histogramBinCenters(xBinValues):
 #Loading our dwell time data
 dwellData = np.loadtxt(r"C:\Users\Andrew\Desktop\Classes\PHYS 339\Lab3\dwellTime.csv", delimiter =',')
 
+#Our confidence interval and number of data points
 confidenceInterval = 0.05
 numData = 100
 
 
 #Time between events in microseconds
 data = dwellData
+
+#Intializing our empty 
 height1 = np.zeros(20)
 edges1 = np.zeros(20)
 patches1 = np.zeros(20)
 
+#Histogramming a bunch of different bins
 h,e,p =  plt.hist(data[0]*10**(-6), bins = 10, range =(0,0.08))
-
 h1,e1,p1 =  plt.hist(data[1]*10**(-6), bins = 10, range =(0,0.08))
 h2,e2,p2 =  plt.hist(data[2]*10**(-6), bins = 10, range =(0,0.08))
 h3,e3,p3 =  plt.hist(data[3]*10**(-6), bins = 10, range =(0,0.08))
@@ -95,14 +98,13 @@ h11,e11,p11 =  plt.hist(data[11]*10**(-6), bins = 10, range =(0,0.08))
 h12,e12,p12 =  plt.hist(data[12]*10**(-6), bins = 10, range =(0,0.08))
 h13,e13,p13 =  plt.hist(data[13]*10**(-6), bins = 10, range =(0,0.08))
 h14,e14,p14 =  plt.hist(data[14]*10**(-6), bins = 10, range =(0,0.08))
+plt.close()     #Close 
 
-plt.close()
+#The bin centers
 binCenters = histogramBinCenters(e1)
 binCenters = np.asarray(binCenters)
-print('mean of data = ')
-print(np.mean((data[0]*10**-6)*10+1))
-
 binCenters = np.linspace(1,10,10)
+
 
 centers = np.zeros(10)
 for i in range(10):
@@ -116,32 +118,19 @@ for i in range(10):
     binMeans[i] = (h[i]+ h1[i] + h2[i] + h3[i] + h4[i] +h5[i]+ h6[i] + h7[i] + h8[i] + h9[i] + h10[i] + h11[i] + h12[i] + h13[i] + h14[i]) / 15
     binStds[i] = np.std([h[i], h1[i], h2[i], h3[i], h4[i],h5[i], h6[i] , h7[i] , h8[i] , h9[i] , h10[i] , h11[i] , h12[i] , h13[i] , h14[i]])
    
-    
-print(h[1] +h[2] + h[3] )
-#cent = np.array([0.004, 0.012, 0.02,  0.028, 0.036, 0.044, 0.052, 0.06,  0.068, 0.076])
-#means = np.array([56.33333333, 24.93333333, 11.13333333,  4.2,1.53333333,  0.86666667,0.6,0.26666667,  0.06666667,  0.06666667])
-plt.figure()
-plt.title("Mean Histogram Over 15 runs")
-plt.xlabel(r'Dwell time between each event in $s$')
-#axes = plt.gca()
-#axes.set_xlim([0,0.1])
-#axes.set_ylim([0,60])
-plt.ylabel("Counts")
-plt.bar(centers,binMeans,1, yerr = binStds)
+#Curve fitting our exponential curve
 ppot, pcov = optimize.curve_fit(exponential,binCenters,binMeans,[10,-1,6])
-
+#Our fitted parameters
 A,b,c = ppot
 A = float(A)
 b = float(b)
 c = float(c)
 
-plt.plot(centers, exponential(centers,A,b,c),label = 'Exponential')
-
 #We want to compare poisson and gaussian
-binMeans = np.asarray(binMeans)
+binMeans = np.asarray(binMeans)     #Convert to a numpy array
 binCenters = np.asarray(binCenters)
-print(binCenters)
-weightedMean = (binCenters@binMeans)/numData
+
+
 variance = 0
 #Different mean
 weightedMean = np.mean((data[0]*10**-6)*10+1)
@@ -160,8 +149,16 @@ gaussianValues = []
 for i in binCenters:
     gaussianValues.append(gaussian(i,weightedMean,variance)*100)
     poissonValues.append(poisson(weightedMean,i)*100)
-plt.plot(binCenters,gaussianValues,'.',label='Gaussian')
-plt.plot(binCenters,poissonValues, '.' ,label = 'Poisson')
+
+#Plotting our fitted histogram figure
+plt.figure()
+plt.title("Mean Histogram of 15 Runs")
+plt.xlabel(r'Dwell time between each event')
+plt.ylabel("Counts")
+plt.bar(centers,binMeans,1, yerr = binStds)
+plt.plot(centers, exponential(centers,A,b,c),'r',label = 'Exponential')
+plt.plot(binCenters,gaussianValues, '.', color = 'orange',label='Gaussian')
+plt.plot(binCenters,poissonValues ,'.', color = 'green',label = 'Poisson')
 plt.legend()
 plt.axvline(weightedMean, color = 'black')
 plt.show()
@@ -177,8 +174,6 @@ gaussianThreshhold = (chi2.isf(confidenceInterval,10 -3))/(10 -3)
 poissonThreshhold = chi2.isf(confidenceInterval,10 -2)/(10-2)
 expThreshold = chi2.isf(confidenceInterval,7)
 
-#Testing the intervals
-print('Number of data points: ' + str(numData))
 #Testing exponential
 if(chiSquareExp < expThreshold):
     print('Exponential fit is consitient')
@@ -200,12 +195,13 @@ elif(chiSquarePos >= poissonThreshhold):
 
 def dataChiSquareTester(data, numData):
 
+    #Initalizing our arrays
     height1 = np.zeros(20)
     edges1 = np.zeros(20)
     patches1 = np.zeros(20)
 
+    #Our different histogram bins
     h,e,p =  plt.hist(data[0]*10**(-6), bins = 10, range =(0,0.08))
-
     h1,e1,p1 =  plt.hist(data[1]*10**(-6), bins = 10, range =(0,0.08))
     h2,e2,p2 =  plt.hist(data[2]*10**(-6), bins = 10, range =(0,0.08))
     h3,e3,p3 =  plt.hist(data[3]*10**(-6), bins = 10, range =(0,0.08))
@@ -220,38 +216,19 @@ def dataChiSquareTester(data, numData):
     h12,e12,p12 =  plt.hist(data[12]*10**(-6), bins = 10, range =(0,0.08))
     h13,e13,p13 =  plt.hist(data[13]*10**(-6), bins = 10, range =(0,0.08))
     h14,e14,p14 =  plt.hist(data[14]*10**(-6), bins = 10, range =(0,0.08))
-
     plt.close()
-    binCenters = histogramBinCenters(e1)
-    binCenters = np.asarray(binCenters)
 
-
+    #Bin Centers
     binCenters = np.linspace(1,10,10)
-
-    centers = np.zeros(10)
-    for i in range(10):
-        centers[i] = 0.5* (e1[i] + e1[i+1])
-
-    centers = binCenters
+    
+    #The mean and Std of bins
     binMeans = np.zeros(10)
     binStds = np.zeros(10)
-
     for i in range(10):
         binMeans[i] = (h[i]+ h1[i] + h2[i] + h3[i] + h4[i] +h5[i]+ h6[i] + h7[i] + h8[i] + h9[i] + h10[i] + h11[i] + h12[i] + h13[i] + h14[i]) / 15
         binStds[i] = np.std([h[i], h1[i], h2[i], h3[i], h4[i],h5[i], h6[i] , h7[i] , h8[i] , h9[i] , h10[i] , h11[i] , h12[i] , h13[i] , h14[i]])
        
-        
-    print(h[1] +h[2] + h[3] )
-    #cent = np.array([0.004, 0.012, 0.02,  0.028, 0.036, 0.044, 0.052, 0.06,  0.068, 0.076])
-    #means = np.array([56.33333333, 24.93333333, 11.13333333,  4.2,1.53333333,  0.86666667,0.6,0.26666667,  0.06666667,  0.06666667])
-    plt.figure()
-    plt.title("Mean Histogram Over 15 runs")
-    plt.xlabel(r'Dwell time between each event in $s$')
-    #axes = plt.gca()
-    #axes.set_xlim([0,0.1])
-    #axes.set_ylim([0,60])
-    plt.ylabel("Counts")
-    plt.bar(centers,binMeans,1, yerr = binStds)
+    #Curve fitting the exponential
     ppot, pcov = optimize.curve_fit(exponential,binCenters,binMeans,[10,-1,6])
 
     A,b,c = ppot
@@ -259,36 +236,28 @@ def dataChiSquareTester(data, numData):
     b = float(b)
     c = float(c)
 
-    plt.plot(centers, exponential(centers,A,b,c),label = 'Exponential')
-
     #We want to compare poisson and gaussian
     binMeans = np.asarray(binMeans)
     binCenters = np.asarray(binCenters)
-    print(binCenters)
-    weightedMean = (binCenters@binMeans)/numData
-    #New mean
+    
     weightedMean = np.mean((data[0]*10**-6)*10+1)
-    variance = 0
 
+    #Standard Deviation
+    variance = 0
     for i,j in zip(binCenters,binMeans):
-        
         variance += ((i - weightedMean)**2)*j
-        
+    
     variance = variance/(numData -1)
     variance = np.sqrt(variance)
 
-    print(variance)
+    #Poisson and Gaussian values
     poissonValues = []
     gaussianValues = []
 
     for i in binCenters:
         gaussianValues.append(gaussian(i,weightedMean,variance)*numData)
         poissonValues.append(poisson(weightedMean,i)*numData)
-    plt.plot(binCenters,gaussianValues,'.',label='Gaussian')
-    plt.plot(binCenters,poissonValues, '.' ,label = 'Poisson')
-    plt.legend()
-    plt.axvline(weightedMean, color = 'black')
-    plt.close()
+    
 
     #Test some chi squared values
     #Calculate
@@ -302,6 +271,7 @@ def dataChiSquareTester(data, numData):
     expThreshold = chi2.isf(confidenceInterval,7)
 
     #Testing the intervals
+    print('---------------------------------------')
     print('Number of data points: ' + str(numData))
     #Testing exponential
     if(chiSquareExp < expThreshold):
@@ -325,17 +295,18 @@ def dataChiSquareTester(data, numData):
 
 
     return
+
+#Nums = number of values added in each distributio n
 nums = np.linspace(5,100)
-
-print(nums)
-
 for j in range(len(nums)):
     passedData = []
+
+    #Adding the data to the array to be passed
     for i in range(20):
         value = int(nums[j])
-        
         passedData.append(data[i][0:value])
     value = int(nums[j])
+
     dataChiSquareTester(passedData,value)
 
 
