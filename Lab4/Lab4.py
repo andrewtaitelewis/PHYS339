@@ -108,10 +108,23 @@ def malusFitter():
 
         return numerator/denominator
 
-    def newPhi(oldPhi):
+    def newPhi(oldPhi,voltageData,V0,phi,varaince):
+        '''Returns an estimation of phi based on the old value of phi 
+        Params:
+        -------
+        oldPhi: the previous guess for phi
+        voltageData: the voltage data we are fitting to
+        V0: guess for V0
+        phi: the initial angle difference between our polarisers
+        variance: the variance in our data, think sigma**2
 
+        Returns:
+        --------
+        A new value of phi
+         '''
 
-        return 1
+        returnedValue = oldPhi - X2P(voltageData,V0,phi,varaince)/X2P2(voltageData,V0,phi,varaince)
+        return returnedValue
     return
 
 #----------------------------------
