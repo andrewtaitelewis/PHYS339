@@ -4,11 +4,9 @@ import matplotlib.pyplot as plt
 from scipy import optimize as opt
 
 
-#Importing that CSV 
-Lab4steps = np.loadtxt(r"C:\Users\Andrew\Desktop\Classes\PHYS 339\Lab4\Lab4steps.csv",delimiter = ',')
-Lab4Vals = np.loadtxt(r"C:\Users\Andrew\Desktop\Classes\PHYS 339\Lab4\Lab4Vals.csv", delimiter = ',')
-
-#Our Functions 
+#==========================================================
+#FUNCTIONS
+#==========================================================
 def malusLawI(theta,V0,phi):
 
     theta = theta*0.0174533
@@ -172,14 +170,20 @@ def malusFitter(voltageData,variance,initialPhiGuess,iterationNum):
 
     return returnedPhis,returnedV0s
 
-#----------------------------------
 
+#==========================================================
 #Section 2.1 - Malus' Law
+#==========================================================
 
-#Importing more CSV
-data21 = np.loadtxt(r"C:\Users\Andrew\Desktop\Classes\PHYS 339\Lab4\AndysVoltageVals.csv", delimiter = ',')
+#Importing that CSV 
+Lab4steps = np.loadtxt(r"Lab4steps.csv",delimiter = ',')
+Lab4Vals = np.loadtxt(r"Lab4Vals.csv", delimiter = ',')
+data21 = np.loadtxt(r"AndysVoltageVals.csv", delimiter = ',')
 
-#Finding the maximum value
+#Data Analysis
+#-------------
+
+#Finding the max value to normalize the data
 maxVal = 0
 for i in data21:
     
@@ -203,18 +207,69 @@ for i in data21.T :
     means.append(np.mean(i))
     std.append(np.std(i))
 
-
+#Fitting our function
 values,cov  = opt.curve_fit(malusLawI,xs,means)
 vnaught = values[0]
 phi = values[1]
 
 
+#======================================================================
+#Section 2,3
+#======================================================================
+#Load all of the data
+brewsterData = np.loadtxt(r"maybe_brewster_BBD.csv", delimiter = ',')
+xAxis = np.linspace(0,len(brewsterData)-1, len(brewsterData) )
 
-plt.plot(xs,malusLawI(xs,vnaught,phi))
-
-plt.errorbar(xs,means,yerr = std, fmt =  '.')
-plt.show()
+#We are looking for a maximum in the transmitted light without the parts where the beam
+#goes through the glass
 
 
-#We will now try with scipy.optimize
+
+
+#======================================================================
+#FIGURES
+#======================================================================
+
+#FIG1 -Malus' Law with Residuals
+def Fig1():
+	fig, (ax1,ax2) = plt.subplots(2,1, constrained_layout = True)
+	fig.suptitle("        Fitting of Malus' Law to Observed Data")
+	ax1.plot(xs,malusLawI(xs,vnaught,phi), label = "Fitted Curve of Malus' Law")
+	ax1.errorbar(xs,means,yerr = std, fmt =  '.', label = "Voltage Response of Photodiode")
+	ax1.set_ylabel('Photodiode Response')
+	ax1.set_xlabel('Angle of Polariser')
+	ax1.set_facecolor((0.97,0.97,0.97))
+	ax1.legend(loc = 'lower right')
+	ax1.set_title('Voltage Response vs. Angle of Polariser')
+
+	#Residuals
+	ax2.errorbar(xs,means - malusLawI(xs,vnaught,phi)  , yerr = std, fmt = '.', label = 'Residuals of Fit')
+	ax2.set_ylabel('Residual')
+	ax2.set_xlabel('Angle of Polariser')
+	ax2.set_facecolor((0.97,0.97,0.97))
+	ax2.legend(loc = 'lower right')
+	ax2.set_title("Residuals of Fitting Malus' Law to Observed Data")
+	ax2.axhline(0,c ='black')
+
+
+
+	fig.align_ylabels()
+	fig.savefig("Malus'_Law")
+	plt.close()
+	return
+
+#FIG2 - Brewster's Angle
+
+def Fig2():
+	plt.plot(xAxis,brewsterData)
+	plt.show()
+	return
+
+
+#-----------------
+#Running the Figures
+Fig2()
+
+
+
 
