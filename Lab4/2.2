@@ -1,0 +1,66 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Feb 25 13:53:30 2020
+
+@author: ggiamp
+"""
+
+import numpy as np
+import string
+import matplotlib.pyplot as p
+import laserClass
+
+vals = []
+means  = np.zeros(4095)
+stds = np.zeros(4095)
+
+i = 0
+a = laserClass.Arduino()       # Begin instance of Arduino class
+steps = 50                # Synonymous with the number of measurements you wish you take
+degsPerStep =1       # This has to be calibrated by you  
+while i < 4095:
+    st = str(i)
+    print(st + "\n\n\n\n\n\n\n\n\n\n\n")
+     
+    a.send("LASER " + st)        # Laser control voltage
+    a.send("STEPS %d"%(steps))  # Total number of steps
+    a.send("DELAY 4")          # Delay time before reading value (ms), >4 recommende
+    a.send("START")             # Start the stepping/reading
+    a.send("STOP")  
+    
+    arryAll = []    # Declare arrays for storing data.
+    stepCounts=[]   # Step indexes
+    adcValues = []  # ADC readings
+
+    index = -1
+    for k in range(steps):
+        resp = a.getResp()
+        if 9 == len(resp) and resp[4] == ':':
+            arryAll.append(resp)               # Append raw response to array of raw serial data
+            print "Got response ", resp, "\n"
+        
+            words = string.split(resp,":")  # Split the response by the colon delimiter
+
+            step = int(words[0])            # Note step count and append to appropriate array
+            stepCounts.append(step)
+        
+            adc = int(words[1])            # Note A0 ADC value and append to appropriate array
+            adcValues.append(adc)
+        else:
+            print("Unexpected response: %s"%(resp))
+            print("Length: %d"%(len(resp)))
+        if 10 == index:
+            break
+        
+    stepCountsCal=np.array(stepCounts)*degsPerStep
+    adcValuesnp=np.array(adcValues)
+    vals.append(adcValuesnp)
+    i = i + 1
+
+for x in range(4095):
+    means[x] = np.mean(vals[x])
+    stds[x] = np.std(vals[x])
+    
+
+np.savetxt("2.2_raw1.csv", vals, delimiter = ',')
+np.savetxt("2.2_means_stds.csv", (means,stds), delimiter = ',')
